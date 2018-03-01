@@ -1,0 +1,412 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>lavalink.PlayerManager &mdash; lavalink 2.0.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="lavalink 2.0.2 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> lavalink
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">lavalink</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>lavalink.PlayerManager</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for lavalink.PlayerManager</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="k">import</span> <span class="n">randrange</span>
+
+<span class="kn">from</span> <span class="nn">.AudioTrack</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.Events</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.Player</span> <span class="k">import</span> <span class="o">*</span>
+
+
+<div class="viewcode-block" id="PlayerManager"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.PlayerManager">[docs]</a><span class="k">class</span> <span class="nc">PlayerManager</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bot</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bot</span> <span class="o">=</span> <span class="n">bot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_players</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_players</span>
+
+<div class="viewcode-block" id="PlayerManager.find"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.PlayerManager.find">[docs]</a>    <span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicate</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns the first player in the list based on the given filter predicate. Could be None &quot;&quot;&quot;</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">predicate</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">found</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">found</span> <span class="k">else</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="PlayerManager.find_all"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.PlayerManager.find_all">[docs]</a>    <span class="k">def</span> <span class="nf">find_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicate</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a list of players based on the given filter predicate &quot;&quot;&quot;</span></div>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">predicate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+
+<div class="viewcode-block" id="PlayerManager.get"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.PlayerManager.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guild_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a player from the cache, or creates one if it does not exist &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">guild_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Player</span><span class="p">(</span><span class="n">bot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bot</span><span class="p">,</span> <span class="n">guild_id</span><span class="o">=</span><span class="n">guild_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="p">[</span><span class="n">guild_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span>
+</div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="p">[</span><span class="n">guild_id</span><span class="p">]</span>
+
+<div class="viewcode-block" id="PlayerManager.has"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.PlayerManager.has">[docs]</a>    <span class="k">def</span> <span class="nf">has</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guild_id</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns the presence of a player in the cache &quot;&quot;&quot;</span></div>
+        <span class="k">return</span> <span class="n">guild_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_players</span>
+
+<div class="viewcode-block" id="PlayerManager.clear"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.PlayerManager.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Removes all of the players from the cache &quot;&quot;&quot;</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_players</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+<div class="viewcode-block" id="PlayerManager.use_player"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.PlayerManager.use_player">[docs]</a>    <span class="k">def</span> <span class="nf">use_player</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">player</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Not implemented &quot;&quot;&quot;</span></div></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>  <span class="c1"># :)</span>
+
+
+<div class="viewcode-block" id="BasePlayer"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.BasePlayer">[docs]</a><span class="k">class</span> <span class="nc">BasePlayer</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guild_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># later</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">guild_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">guild_id</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">is_playing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_handle_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<div class="viewcode-block" id="DefaultPlayer"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.DefaultPlayer">[docs]</a><span class="k">class</span> <span class="nc">DefaultPlayer</span><span class="p">(</span><span class="n">BasePlayer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bot</span><span class="p">,</span> <span class="n">guild_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bot</span> <span class="o">=</span> <span class="n">bot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">guild_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">guild_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">channel_id</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">paused</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position_timestamp</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeat</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_playing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns the player&#39;s track state &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_channel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns the player&#39;s connection state &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_channel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">connected_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns the voicechannel the player is connected to &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel_id</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bot</span><span class="o">.</span><span class="n">get_channel</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel_id</span><span class="p">))</span>
+
+<div class="viewcode-block" id="DefaultPlayer.connect"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.DefaultPlayer.connect">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Connects to a voicechannel &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;op&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;guild_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">guild_id</span><span class="p">,</span>
+                <span class="s1">&#39;channel_id&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">channel_id</span><span class="p">),</span>
+                <span class="s1">&#39;self_mute&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;self_deaf&#39;</span><span class="p">:</span> <span class="kc">False</span>
+            <span class="p">}</span>
+        <span class="p">}</span></div>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bot</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">_get_websocket</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">guild_id</span><span class="p">))</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
+
+<div class="viewcode-block" id="DefaultPlayer.disconnect"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.DefaultPlayer.disconnect">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Disconnects from the voicechannel, if any &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_connected</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;op&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;guild_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">guild_id</span><span class="p">,</span>
+                <span class="s1">&#39;channel_id&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;self_mute&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;self_deaf&#39;</span><span class="p">:</span> <span class="kc">False</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+</div>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bot</span><span class="o">.</span><span class="n">_connection</span><span class="o">.</span><span class="n">_get_websocket</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">guild_id</span><span class="p">))</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
+
+<div class="viewcode-block" id="DefaultPlayer.store"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.DefaultPlayer.store">[docs]</a>    <span class="k">def</span> <span class="nf">store</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Stores custom user data &quot;&quot;&quot;</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+
+<div class="viewcode-block" id="DefaultPlayer.fetch"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.DefaultPlayer.fetch">[docs]</a>    <span class="k">def</span> <span class="nf">fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Retrieves the related value from the stored user data &quot;&quot;&quot;</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DefaultPlayer.add"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.DefaultPlayer.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">requester</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">track</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Adds a track to the queue &quot;&quot;&quot;</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AudioTrack</span><span class="p">()</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">requester</span><span class="p">))</span>
+
+<div class="viewcode-block" id="DefaultPlayer.play"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.DefaultPlayer.play">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Plays the first track in the queue, if any &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">repeat</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paused</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bot</span><span class="o">.</span><span class="n">lavalink</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_trigger_event</span><span class="p">(</span><span class="s1">&#39;QueueEndEvent&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">guild_id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">:</span>
+                <span class="n">track</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">randrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">track</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">track</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bot</span><span class="o">.</span><span class="n">lavalink</span><span class="o">.</span><span class="n">ws</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">op</span><span class="o">=</span><span class="s1">&#39;play&#39;</span><span class="p">,</span> <span class="n">guildId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">guild_id</span><span class="p">,</span> <span class="n">track</span><span class="o">=</span><span class="n">track</span><span class="o">.</span><span class="n">track</span><span class="p">)</span></div>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bot</span><span class="o">.</span><span class="n">lavalink</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_trigger_event</span><span class="p">(</span><span class="s1">&#39;TrackStartEvent&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">guild_id</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DefaultPlayer.stop"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.DefaultPlayer.stop">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Stops the player, if playing &quot;&quot;&quot;</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bot</span><span class="o">.</span><span class="n">lavalink</span><span class="o">.</span><span class="n">ws</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">op</span><span class="o">=</span><span class="s1">&#39;stop&#39;</span><span class="p">,</span> <span class="n">guildId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">guild_id</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="DefaultPlayer.skip"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.DefaultPlayer.skip">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">skip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Moves the player onto the next track in the queue &quot;&quot;&quot;</span></div>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DefaultPlayer.set_pause"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.DefaultPlayer.set_pause">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">set_pause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pause</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sets the player&#39;s paused state &quot;&quot;&quot;</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bot</span><span class="o">.</span><span class="n">lavalink</span><span class="o">.</span><span class="n">ws</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">op</span><span class="o">=</span><span class="s1">&#39;pause&#39;</span><span class="p">,</span> <span class="n">guildId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">guild_id</span><span class="p">,</span> <span class="n">pause</span><span class="o">=</span><span class="n">pause</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paused</span> <span class="o">=</span> <span class="n">pause</span>
+
+<div class="viewcode-block" id="DefaultPlayer.set_volume"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.DefaultPlayer.set_volume">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">set_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vol</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sets the player&#39;s volume (150% limit imposed by lavalink) &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">vol</span><span class="p">,</span> <span class="mi">150</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span></div>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bot</span><span class="o">.</span><span class="n">lavalink</span><span class="o">.</span><span class="n">ws</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">op</span><span class="o">=</span><span class="s1">&#39;volume&#39;</span><span class="p">,</span> <span class="n">guildId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">guild_id</span><span class="p">,</span> <span class="n">volume</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">volume</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DefaultPlayer.seek"><a class="viewcode-back" href="../../source/lavalink.html#lavalink.PlayerManager.DefaultPlayer.seek">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">seek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Seeks to a given position in the track &quot;&quot;&quot;</span></div>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bot</span><span class="o">.</span><span class="n">lavalink</span><span class="o">.</span><span class="n">ws</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">op</span><span class="o">=</span><span class="s1">&#39;seek&#39;</span><span class="p">,</span> <span class="n">guildId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">guild_id</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">pos</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_handle_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="p">(</span><span class="n">TrackStartEvent</span><span class="p">,</span> <span class="n">TrackExceptionEvent</span><span class="p">))</span> <span class="ow">or</span> \
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">TrackEndEvent</span><span class="p">)</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">reason</span> <span class="o">==</span> <span class="s1">&#39;FINISHED&#39;</span><span class="p">:</span></div>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, luke.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'2.0.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
